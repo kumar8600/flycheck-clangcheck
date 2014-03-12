@@ -1,0 +1,68 @@
+#+TITLE: flycheck-clangcheck
+#+AUTHOR: kumar8600
+#+LANGUAGE: en
+
+  Flycheck checker difinition for [[http://clang.llvm.org/docs/ClangCheck.html][ClangCheck]].
+
+** Installation
+
+*** Prerequisites
+
+    - clang-check (this is part of clang.)
+
+*** Setup
+
+    1. Clone this repository:
+
+       : $ git clone https://github.com/kumar8600/flycheck-clangcheck
+       
+    2. Add settings for =~/.emacs.d/init.el=:
+       
+       #+BEGIN_SRC emacs-lisp
+         (add-to-list 'load-path "/path/to/flycheck-clangcheck")
+         (require 'flycheck-clangcheck)
+         
+         (flycheck-set-checker-executable 'c/c++-clangcheck
+                                          "/path/to/clang-check")
+         (defun my-select-clangcheck-for-checker ()
+           "Select clang-check for flycheck's checker."
+           (flycheck-select-checker 'c/c++-clangcheck))
+         
+         (add-hook 'c-mode-hook #'my-select-clangcheck-for-checker)
+         (add-hook 'c++-mode-hook #'my-select-clangcheck-for-checker)
+       #+END_SRC
+
+*** Customizable variables
+
+    - =flycheck-clangcheck-analyze= ::
+	 Whether to enable Static Analysis to C/C++ in ClangCheck.
+	 
+	 When non-nil, enable Static Analysis to C/C++ via =-analyze=.
+
+    - =flycheck-clangcheck-extra-arg= ::
+	 Additional argument to append to the compiler command line for ClangCheck.
+	 
+	 The value of this variable is a list of strings, where each
+	 string is an additional argument to pass to ClangCheck, via
+	 the =-extra-arg= option."
+
+    - =flycheck-clangcheck-extra-arg-before= ::
+	 Additional argument to prepend to the compiler command line for ClangCheck.
+	 
+	 The value of this variable is a list of strings, where each
+	 string is an additional argument to prepend to the compiler
+	 command line to pass to ClangCheck, via the
+	 =-extra-arg-before= option."
+
+    - =flycheck-clangcheck-fatal-assembler-warnings= ::
+	 Whether to enable Considering warning as error to C/C++ in ClangCheck.
+	 
+	 When non-nil, enable Considering warning as error to ClangCheck via
+	 =-fatal-assembler-warnings=."
+      
+    - =flycheck-clangcheck-build-path= ::
+	 Build directory for ClangCheck.
+	 
+	 The value of this variable is a string, describing
+	 build directory =compile_commands.json= exists to ClangCheck via =-p=."
+
