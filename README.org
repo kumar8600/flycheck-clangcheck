@@ -16,17 +16,17 @@
     1. Clone this repository:
 
        : $ git clone https://github.com/kumar8600/flycheck-clangcheck
-       
+
     2. Add settings for =~/.emacs.d/init.el=:
        
        #+BEGIN_SRC emacs-lisp
          (add-to-list 'load-path "/path/to/flycheck-clangcheck")
          (require 'flycheck-clangcheck)
          
-         (flycheck-set-checker-executable 'c/c++-clangcheck
-                                          "/path/to/clang-check")
          (defun my-select-clangcheck-for-checker ()
            "Select clang-check for flycheck's checker."
+           (flycheck-set-checker-executable 'c/c++-clangcheck
+                                            "/path/to/clang-check")
            (flycheck-select-checker 'c/c++-clangcheck))
          
          (add-hook 'c-mode-hook #'my-select-clangcheck-for-checker)

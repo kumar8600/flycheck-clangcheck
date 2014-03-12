@@ -2,7 +2,7 @@
 
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/flycheck-clangcheck
-;; Version: 0.10
+;; Version: 0.11
 ;; Package-Requires: ((cl-lib "0.5") (json "1.3") (flycheck "0.17"))
 		   
 ;; Copyright (c) 2014 by kumar8600
@@ -84,55 +84,57 @@ build directory `compile_commands.json' exists to ClangCheck via `-p'."
   :safe #'stringp)
 
 (defun flycheck-clangcheck-get-compile-command (build-dir source)
-  "Get compile command from `compile_commands.json' at BUILD-DIR for SOURCE."
+  "Get a list of compile commands from `compile_commands.json' at BUILD-DIR for SOURCE."
   (let ((commands (json-read-file (expand-file-name "compile_commands.json"
-						    build-dir))))
+						    build-dir)))
+	(source-truename (file-truename source)))
     (let ((found (cl-find-if (lambda (item)
-			       (string= source
-					(expand-file-name (cdr (assq 'file item))
-							  build-dir)))
+			       (string= source-truename
+					(file-truename (cdr (assq 'file item)))))
 			     commands)))
-      (unless found
-	(error "Can't found `%s' in `compile_commands.json'" source))
-      (cdr (assq 'command found)))))
+      (if found
+	  (split-string-and-unquote (cdr (assq 'command found)))
+	nil))))
 
 (flycheck-define-checker c/c++-clangcheck
   "A C/C++ syntax checker using ClangCheck.
 
 See URL `http://clang.llvm.org/docs/ClangCheck.html'."
-    :command ("clang-check"
-	      (option-flag "-analyze" flycheck-clangcheck-analyze)
-	      (option-flag "-fatal-assembler-warnings" flycheck-clangcheck-fatal-assembler-warnings)
-	      (option-list "-extra-arg=" flycheck-clangcheck-extra-arg s-prepend)
-	      (option-list "-extra-arg-before=" flycheck-clangcheck-extra-arg-before s-prepend)
-	      (option      "-p=" flycheck-clangcheck-build-path)
-	      ;; We must stay in the same directory, to properly resolve #include
-	      ;; with quotes
-	      source-inplace
-	      "--"
-	      ;; To get works well with `source-inplace', build-directory's
-	      ;; `compile_commands.json' parsing is done by own logic.
-	      (eval
-	       (if flycheck-clangcheck-build-path
-		   (flycheck-clangcheck-get-compile-command flycheck-clangcheck-build-path
-							    (buffer-file-name))
+  :command ("clang-check"
+	    (option-flag "-analyze" flycheck-clangcheck-analyze)
+	    (option-flag "-fatal-assembler-warnings" flycheck-clangcheck-fatal-assembler-warnings)
+	    (option-list "-extra-arg=" flycheck-clangcheck-extra-arg s-prepend)
+	    (option-list "-extra-arg-before=" flycheck-clangcheck-extra-arg-before s-prepend)
+	    (option      "-p=" flycheck-clangcheck-build-path)
+	    ;; We must stay in the same directory, to properly resolve #include
+	    ;; with quotes
+	    source-inplace
+	    "--"
+	    ;; To get works well with `source-inplace', build-directory's
+	    ;; `compile_commands.json' parsing is done by own logic.
+	    (eval
+	     (or (and flycheck-clangcheck-build-path
+		      (or (flycheck-clangcheck-get-compile-command flycheck-clangcheck-build-path
+								   (buffer-file-name))
+			  (progn (message "Build directory is set, but not found compile command from `compile_commands.json'.")
+				 nil)))
 		 (concat "-x"
 			 (cl-case major-mode
 			   (c++-mode "c++")
 			   (c-mode "c")))))
-	      "-fno-color-diagnostics"    ; Do not include color codes in output
-	      "-fno-caret-diagnostics"    ; Do not visually indicate the source
-					  ; location
-	      "-fno-diagnostics-show-option") ; Do not show the corresponding
+	    "-fno-color-diagnostics"    ; Do not include color codes in output
+	    "-fno-caret-diagnostics"    ; Do not visually indicate the source
+					; location
+	    "-fno-diagnostics-show-option") ; Do not show the corresponding
    					      ; warning group
-    :error-patterns
-    ((info line-start (file-name) ":" line ":" column
-	   ": note: " (message) line-end)
-     (warning line-start (file-name) ":" line ":" column
-	      ": warning: " (message) line-end)
-     (error line-start (file-name) ":" line ":" column
-	    ": " (or "fatal error" "error") ": " (message) line-end))
-    :modes (c-mode c++-mode))
+  :error-patterns
+  ((info line-start (file-name) ":" line ":" column
+	 ": note: " (message) line-end)
+   (warning line-start (file-name) ":" line ":" column
+	    ": warning: " (message) line-end)
+   (error line-start (file-name) ":" line ":" column
+	  ": " (or "fatal error" "error") ": " (message) line-end))
+  :modes (c-mode c++-mode))
 
 (add-to-list 'flycheck-checkers 'c/c++-clangcheck)
 
