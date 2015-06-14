@@ -31,6 +31,9 @@
          
          (add-hook 'c-mode-hook #'my-select-clangcheck-for-checker)
          (add-hook 'c++-mode-hook #'my-select-clangcheck-for-checker)
+         
+         ;; enable static analysis
+         (setq flycheck-clangcheck-analyze t)
        #+END_SRC
 
 *** Customizable variables
@@ -43,4 +46,4 @@
 
     - =flycheck-clangcheck-fatal-assembler-warnings= :: Whether to enable Considering warning as error to C/C++ in ClangCheck.
       
-    - =flycheck-clangcheck-build-path= :: Build directory for ClangCheck. If this is defined, a [[http://clang.llvm.org/docs/JSONCompilationDatabase.html][JSON Compilation Database]] (=compile_commands.json=) must be placed in there.
+    - =flycheck-clangcheck-build-path= :: Build directory for ClangCheck. If this is defined, a [[http://clang.llvm.org/docs/JSONCompilationDatabase.html][JSON Compilation Database]] (=compile_commands.json=) must be placed to there.
