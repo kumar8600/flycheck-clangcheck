@@ -2,8 +2,8 @@
 
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/flycheck-clangcheck
-;; Version: 0.20
-;; Package-Requires: ((cl-lib "0.5") (json "1.3") (flycheck "0.17"))
+;; Version: 0.21
+;; Package-Requires: ((cl-lib "0.5") (flycheck "0.17"))
 		   
 ;; Copyright (c) 2015 by kumar8600 <kumar8600@gmail.com>
 
