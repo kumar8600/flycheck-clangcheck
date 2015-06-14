@@ -3,7 +3,7 @@
 
 * flycheck-clangcheck
 
-  Flycheck checker difinition for [[http://clang.llvm.org/docs/ClangCheck.html][ClangCheck]].
+  A [[https://github.com/flycheck/flycheck][Flycheck]] checker difinition for [[http://clang.llvm.org/docs/ClangCheck.html][ClangCheck]].
 
 ** Installation
 
@@ -43,4 +43,4 @@
 
     - =flycheck-clangcheck-fatal-assembler-warnings= :: Whether to enable Considering warning as error to C/C++ in ClangCheck.
       
-    - =flycheck-clangcheck-build-path= :: Build directory for ClangCheck.
+    - =flycheck-clangcheck-build-path= :: Build directory for ClangCheck. If this is defined, a [[http://clang.llvm.org/docs/JSONCompilationDatabase.html][JSON Compilation Database]] (=compile_commands.json=) must be placed in there.
