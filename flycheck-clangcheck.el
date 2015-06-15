@@ -28,6 +28,14 @@
 (require 'json)
 (require 'flycheck)
 
+(flycheck-def-option-var flycheck-clangcheck-dbname "compile_commands.json" c/c++-clangcheck
+  "Name of the compile commands database for ClangCheck.
+
+The value of this variable is a string, describing
+a name of the build commands database."
+  :type '(file :tag "Compile database")
+  :safe #'stringp)
+
 (flycheck-def-option-var flycheck-clangcheck-analyze nil c/c++-clangcheck
   "Whether to enable Static Analysis to C/C++ in ClangCheck.
 
@@ -71,8 +79,8 @@ a build directory where `compile_commands.json' exists."
   :safe #'stringp)
 
 (defun flycheck-clangcheck-get-compile-command (build-dir source)
-  "Get a list of compile commands from `compile_commands.json' at BUILD-DIR for SOURCE."
-  (let ((commands (json-read-file (expand-file-name "compile_commands.json"
+  "Get a list of compile commands from `flycheck-clangcheck-dbname' at BUILD-DIR for SOURCE."
+  (let ((commands (json-read-file (expand-file-name flycheck-clangcheck-dbname
 						    build-dir)))
 	(source-truename (file-truename source)))
     (let ((found (cl-find-if (lambda (item)
