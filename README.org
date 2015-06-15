@@ -3,6 +3,8 @@
 
 * flycheck-clangcheck
 
+[[http://melpa.org/#/flycheck-clangcheck][file:http://melpa.org/packages/flycheck-clangcheck-badge.svg]]
+
   A [[https://github.com/flycheck/flycheck][Flycheck]] checker difinition for [[http://clang.llvm.org/docs/ClangCheck.html][ClangCheck]].
 
 ** Installation
@@ -13,14 +15,20 @@
 
 *** Setup
 
-    1. Clone this repository:
+    1. Install:
+    
+      MELPA:
+       
+        [[http://melpa.org/#/flycheck-clangcheck][file:http://melpa.org/packages/flycheck-clangcheck-badge.svg]]
+       
+      or clone this repository:
 
        : $ git clone https://github.com/kumar8600/flycheck-clangcheck
 
     2. Add settings for =~/.emacs.d/init.el=:
        
        #+BEGIN_SRC emacs-lisp
-         (add-to-list 'load-path "/path/to/flycheck-clangcheck")
+         (add-to-list 'load-path "/path/to/flycheck-clangcheck") ;; if you installed manually
          (require 'flycheck-clangcheck)
          
          (defun my-select-clangcheck-for-checker ()
