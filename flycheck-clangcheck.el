@@ -77,19 +77,44 @@ The value of this variable is a string, describing
 a build directory where `compile_commands.json' exists."
   :type '(directory :tag "Build directory")
   :safe #'stringp)
+(make-variable-buffer-local 'flycheck-clangcheck-build-path)
 
-(defun flycheck-clangcheck-get-compile-command (build-dir source)
-  "Get a list of compile commands from `flycheck-clangcheck-dbname' at BUILD-DIR for SOURCE."
+(defun flycheck-clangcheck-find-compiledb-dir (file-or-dir)
+  "Given FILE-OR-DIR search up for `flycheck-clangcheck-dbname'.
+
+Return the directory which contains the database or nil."
+  (let ((root-dir
+         (locate-dominating-file
+          file-or-dir
+          flycheck-clangcheck-dbname)))
+    (when root-dir
+      (expand-file-name root-dir))))
+    
+(defun flycheck-clangcheck-get-json (build-dir source)
+  "Get a the compile commands from `flycheck-clangcheck-dbname' at BUILD-DIR for SOURCE."
   (let ((commands (json-read-file (expand-file-name flycheck-clangcheck-dbname
 						    build-dir)))
 	(source-truename (file-truename source)))
-    (let ((found (cl-find-if (lambda (item)
-			       (string= source-truename
-					(file-truename (cdr (assq 'file item)))))
-			     commands)))
-      (if found
-	  (split-string-and-unquote (cdr (assq 'command found)))
-	nil))))
+    (cl-find-if (lambda (item)
+                  (string= source-truename
+                           (file-truename (cdr (assq 'file item)))))
+                commands)))
+
+(defun flycheck-clangcheck-get-compile-command (json)
+  "Return the compile command for a given `JSON' fragment from the
+  compile database."
+  (if json
+      (split-string-and-unquote (cdr (assq 'command json)))
+    nil))
+
+(defun flycheck-clangcheck-set-build-dir (json)
+  "Set `default-directory' to be that as specified in the `JSON'
+fragment.
+
+This has the unfortunate side effect of trashing the buffer's
+`default-directory'."
+  (setq default-directory (file-name-as-directory (cdr (assq 'directory json)))))
+  
 
 (flycheck-define-checker c/c++-clangcheck
   "A C/C++ syntax checker using ClangCheck.
@@ -100,7 +125,8 @@ See URL `http://clang.llvm.org/docs/ClangCheck.html'."
 	    (option-flag "-fatal-assembler-warnings" flycheck-clangcheck-fatal-assembler-warnings)
 	    (option-list "-extra-arg=" flycheck-clangcheck-extra-arg s-prepend)
 	    (option-list "-extra-arg-before=" flycheck-clangcheck-extra-arg-before s-prepend)
-	    (option      "-p=" flycheck-clangcheck-build-path)
+            "--extra-arg=-Wno-unknown-warning-option" ; silence GCC options
+            "--extra-arg=-Wno-null-character"         ; silence null
 	    ;; We must stay in the same directory, to properly resolve #include
 	    ;; with quotes
 	    source-inplace
@@ -108,15 +134,26 @@ See URL `http://clang.llvm.org/docs/ClangCheck.html'."
 	    ;; To get works well with `source-inplace', build-directory's
 	    ;; `compile_commands.json' parsing is done by own logic.
 	    (eval
-	     (or (and flycheck-clangcheck-build-path
-		      (or (flycheck-clangcheck-get-compile-command flycheck-clangcheck-build-path
-								   (buffer-file-name))
-			  (progn (message "Build directory is set, but not found compile command from `compile_commands.json'.")
-				 nil)))
-		 (concat "-x"
-			 (cl-case major-mode
-			   (c++-mode "c++")
-			   (c-mode "c")))))
+             (progn
+               (unless flycheck-clangcheck-build-path
+                 (setq flycheck-clangcheck-build-path
+                       (flycheck-clangcheck-find-compiledb-dir
+                        (buffer-file-name))))
+               (if flycheck-clangcheck-build-path
+                   (progn
+                     (let ((json
+                            (flycheck-clangcheck-get-json
+                             flycheck-clangcheck-build-path
+                             (buffer-file-name))))
+                       ;; for side-effect only
+                       (flycheck-clangcheck-set-build-dir json)
+
+                       ;; return the commands
+                       (flycheck-clangcheck-get-compile-command json)))
+                 (concat "-x"
+                         (cl-case major-mode
+                           (c++-mode "c++")
+                           (c-mode "c"))))))
 	    "-fno-color-diagnostics"    ; Do not include color codes in output
 	    "-fno-caret-diagnostics"    ; Do not visually indicate the source
 					; location
