@@ -3,7 +3,7 @@
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/flycheck-clangcheck
 ;; Version: 0.21
-;; Package-Requires: ((cl-lib "0.5") (flycheck "0.17"))
+;; Package-Requires: ((cl-lib "0.5") (seq "1.7") (flycheck "0.17"))
 		   
 ;; Copyright (c) 2015 by kumar8600 <kumar8600@gmail.com>
 
@@ -26,6 +26,7 @@
 
 (require 'cl-lib)
 (require 'json)
+(require 'seq)
 (require 'flycheck)
 
 (flycheck-def-option-var flycheck-clangcheck-dbname "compile_commands.json" c/c++-clangcheck
@@ -102,9 +103,23 @@ Return the directory which contains the database or nil."
 
 (defun flycheck-clangcheck-get-compile-command (json)
   "Return the compile command for a given `JSON' fragment from the
-  compile database."
+  compile database.
+
+We apply some basic filters to avoid weird cases."
   (if json
-      (split-string-and-unquote (cdr (assq 'command json)))
+      (let ((raw-cmds (split-string-and-unquote (cdr (assq 'command json))))
+            (skip-next nil))
+        (seq-filter (lambda (it)
+                      (cond
+                       ;; Don't output dependencies as this will likely confuse
+                       ;; real builds 
+                       ((string-match "-MF" it) (not (setq skip-next t)))
+                       ((string-match "-MD" it) nil)
+                       ((string-match "-MMD" it) nil)
+                       ;; skip a positional argument
+                       (skip-next (setq skip-next nil))
+                       (t t)))
+         raw-cmds))
     nil))
 
 (defun flycheck-clangcheck-set-build-dir (json)
