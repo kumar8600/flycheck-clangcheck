@@ -145,11 +145,16 @@ See URL `http://clang.llvm.org/docs/ClangCheck.html'."
                             (flycheck-clangcheck-get-json
                              flycheck-clangcheck-build-path
                              (buffer-file-name))))
-                       ;; for side-effect only
-                       (flycheck-clangcheck-set-build-dir json)
-
-                       ;; return the commands
-                       (flycheck-clangcheck-get-compile-command json)))
+                       (if json
+                           (progn
+                             ;; for side-effect only
+                             (flycheck-clangcheck-set-build-dir json)
+                             ;; return the commands
+                             (flycheck-clangcheck-get-compile-command
+                              json))
+                         (progn (message "Couldn't find compile
+  command from `compile_commands.json' in %s." flycheck-clangcheck-build-path)
+                                nil))))
                  (concat "-x"
                          (cl-case major-mode
                            (c++-mode "c++")
