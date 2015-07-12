@@ -53,5 +53,7 @@
     - =flycheck-clangcheck-extra-arg-before= :: Additional argument to prepend to the compiler command line for ClangCheck.
 
     - =flycheck-clangcheck-fatal-assembler-warnings= :: Whether to enable Considering warning as error to C/C++ in ClangCheck.
+
+    - =flycheck-clangcheck-dbname= :: The name of the [[http://clang.llvm.org/docs/JSONCompilationDatabase.html][JSON Compilation Database]] (default =compile_commands.json=).
       
-    - =flycheck-clangcheck-build-path= :: Build directory for ClangCheck. If this is defined, a [[http://clang.llvm.org/docs/JSONCompilationDatabase.html][JSON Compilation Database]] (=compile_commands.json=) must be placed to there.
+    - =flycheck-clangcheck-build-path= :: Build directory for ClangCheck. If this is defined, a [[http://clang.llvm.org/docs/JSONCompilationDatabase.html][JSON Compilation Database]] (=flycheck-clangcheck-dbname=) must be placed to there.
