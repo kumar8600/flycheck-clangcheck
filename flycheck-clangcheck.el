@@ -2,8 +2,8 @@
 
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/flycheck-clangcheck
-;; Version: 0.21
-;; Package-Requires: ((cl-lib "0.5") (seq "1.7") (flycheck "0.17"))
+;; Version: 0.22
+;; Package-Requires: ((cl-lib "0.5") (seq "1.7") (s "1.9.0") (flycheck "0.17"))
 		   
 ;; Copyright (c) 2015 by kumar8600 <kumar8600@gmail.com>
 
@@ -27,6 +27,7 @@
 (require 'cl-lib)
 (require 'json)
 (require 'seq)
+(require 's)
 (require 'flycheck)
 
 (flycheck-def-option-var flycheck-clangcheck-dbname "compile_commands.json" c/c++-clangcheck
