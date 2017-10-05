@@ -4,7 +4,7 @@
 ;; URL: https://github.com/kumar8600/flycheck-clangcheck
 ;; Version: 0.21
 ;; Package-Requires: ((cl-lib "0.5") (seq "1.7") (flycheck "0.17"))
-		   
+
 ;; Copyright (c) 2015 by kumar8600 <kumar8600@gmail.com>
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -90,7 +90,7 @@ Return the directory which contains the database or nil."
           flycheck-clangcheck-dbname)))
     (when root-dir
       (expand-file-name root-dir))))
-    
+
 (defun flycheck-clangcheck-get-json (build-dir source)
   "Get a the compile commands from `flycheck-clangcheck-dbname' at BUILD-DIR for SOURCE."
   (let ((commands (json-read-file (expand-file-name flycheck-clangcheck-dbname
@@ -98,8 +98,15 @@ Return the directory which contains the database or nil."
 	(source-truename (file-truename source)))
     (cl-find-if (lambda (item)
                   (string= source-truename
-                           (file-truename (cdr (assq 'file item)))))
+                           (flycheck-clangcheck-get-truename item)))
                 commands)))
+
+(defun flycheck-clangcheck-get-truename (entry)
+  "Return the absolute path of an `ENTRY` from the compile database."
+  (let ((dir (cdr (assq 'directory entry)))
+        (file (cdr (assq 'file entry))))
+    (let ((default-directory dir))
+      (file-truename file))))
 
 (defun flycheck-clangcheck-get-compile-command (json)
   "Return the compile command for a given `JSON' fragment from the
@@ -112,7 +119,7 @@ We apply some basic filters to avoid weird cases."
         (seq-filter (lambda (it)
                       (cond
                        ;; Don't output dependencies as this will likely confuse
-                       ;; real builds 
+                       ;; real builds
                        ((string-match "-MF" it) (not (setq skip-next t)))
                        ((string-match "-MD" it) nil)
                        ((string-match "-MMD" it) nil)
@@ -129,7 +136,7 @@ fragment.
 This has the unfortunate side effect of trashing the buffer's
 `default-directory'."
   (setq default-directory (file-name-as-directory (cdr (assq 'directory json)))))
-  
+
 
 (flycheck-define-checker c/c++-clangcheck
   "A C/C++ syntax checker using ClangCheck.
