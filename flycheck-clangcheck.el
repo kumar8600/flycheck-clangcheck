@@ -98,7 +98,9 @@ Return the directory which contains the database or nil."
 	(source-truename (file-truename source)))
     (cl-find-if (lambda (item)
                   (string= source-truename
-                           (file-truename (cdr (assq 'file item)))))
+                           (file-truename
+			    (expand-file-name (cdr (assq 'file item))
+					      (cdr (assq 'directory item))))))
                 commands)))
 
 (defun flycheck-clangcheck-get-compile-command (json)
@@ -107,8 +109,11 @@ Return the directory which contains the database or nil."
 
 We apply some basic filters to avoid weird cases."
   (if json
-      (let ((raw-cmds (split-string-and-unquote (cdr (assq 'command json))))
-            (skip-next nil))
+      (let* ((command (cdr (assq 'command json)))
+	     (raw-cmds (if command
+			   (split-string-and-unquote command)
+			 (cdr (assq 'arguments json))))
+             (skip-next nil))
         (seq-filter (lambda (it)
                       (cond
                        ;; Don't output dependencies as this will likely confuse
