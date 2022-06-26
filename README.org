@@ -5,7 +5,7 @@
 
 [[http://melpa.org/#/flycheck-clangcheck][file:http://melpa.org/packages/flycheck-clangcheck-badge.svg]]
 
-  A [[https://github.com/flycheck/flycheck][Flycheck]] checker difinition for [[http://clang.llvm.org/docs/ClangCheck.html][ClangCheck]].
+  A [[https://github.com/flycheck/flycheck][Flycheck]] checker definition for [[http://clang.llvm.org/docs/ClangCheck.html][ClangCheck]].
 
 ** Installation
 
