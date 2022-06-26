@@ -1,4 +1,4 @@
-;;; flycheck-clangcheck.el --- A Flycheck checker difinition for ClangCheck.
+;;; flycheck-clangcheck.el --- A Flycheck checker definition for ClangCheck.
 
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/flycheck-clangcheck
